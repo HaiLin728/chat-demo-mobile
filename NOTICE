@@ -1,0 +1,16 @@
+# NOTICE
+
+本项目的界面与前端逻辑来自 **deepseek-ai/chat-demo**：
+
+- 来源：https://github.com/deepseek-ai/chat-demo
+- 协议：MIT License
+- 版权：Copyright (c) 2026 DeepSeek
+
+在上游基础上做了以下修改：
+
+- 使用 Capacitor 封装为独立的 Android / iOS 应用
+- 增加原生适配：状态栏跟随主题、安卓返回键逐层关闭浮层、边到边安全区、键盘避让
+- 历史记录导出从浏览器下载改为系统分享面板
+- 构建脚本、目录结构与文档调整
+
+修改部分同样以 MIT License 发布。本项目为非官方项目，与 DeepSeek 没有隶属关系。

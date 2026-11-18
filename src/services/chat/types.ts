@@ -105,6 +105,16 @@ export type AssistantMessage = MessageBranch & {
 
 export type Message = UserMessage | AssistantMessage
 
+/** 较早轮次的压缩摘要；覆盖到 coveredId 这条回复为止，前三轮与最近几轮不压缩。 */
+export type SessionCompression = {
+  summary: string
+  /** 已并入摘要的最后一轮回复 id；不在当前分支时摘要视为失效 */
+  coveredId: string
+  /** 已压缩的轮次数，用于界面提示 */
+  rounds: number
+  updatedAt: number
+}
+
 export type Session = {
   id: string
   title: string
@@ -114,6 +124,8 @@ export type Session = {
   messages: Message[]
   /** undefined 表示线性消息列表；null 表示空会话。 */
   rootMessageId?: string | null
+  /** 上下文超预算后生成的较早轮次摘要，仅本机保存。 */
+  compression?: SessionCompression
 }
 
 /** 会话列表元数据；消息只在打开会话时加载。 */

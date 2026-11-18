@@ -193,6 +193,11 @@ export const en = {
   longShotTooShort: 'This chat fits on one screen, no long image needed',
   longShotSaveFailed: 'Failed to generate the image. Please try again.',
   longShotTruncated: 'The chat is long; the image only contains the beginning',
+  contextCompressed: 'Context was long, so the earliest {rounds} rounds were compressed into a summary',
+  contextCompressFailed: 'Summary generation failed; earlier rounds were skipped',
+  contextSummaryTitle: 'Summary of the earlier {rounds} rounds',
+  contextSummaryShow: 'Show summary',
+  contextSummaryHide: 'Hide summary',
   startupNoticeTitle: 'Before you start',
   startupNoticeUnofficial:
     'This is an unofficial open-source project and is not affiliated with DeepSeek.',

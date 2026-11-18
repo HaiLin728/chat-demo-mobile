@@ -9,6 +9,7 @@ import { selectMessageVersion } from '../../services/chat/store.js'
 import type { Session } from '../../services/chat/types.js'
 import { closeSearchPanel } from '../search/searchPanelState.js'
 import { AssistantMessage } from './AssistantMessage.js'
+import { ContextSummary } from './ContextSummary.js'
 import { ScrollToBottomContext } from './scrollContext.js'
 import { UserMessage } from './UserMessage.js'
 import type { Message } from '../../services/chat/types.js'
@@ -141,6 +142,12 @@ export const MessageList = ({
 
   const lastIndex = messages.length - 1
   const uploadRetryId = getUploadRetryId(messages, streaming)
+  // 摘要只在覆盖的那条回复仍在当前分支上时展示，切换分支后不显示过期摘要
+  const compression =
+    session.compression &&
+    messages.some((message) => message.id === session.compression?.coveredId)
+      ? session.compression
+      : undefined
   return (
     <ScrollToBottomContext.Provider value={scrollToBottom}>
       <div
@@ -150,6 +157,7 @@ export const MessageList = ({
       >
         <div ref={isMobile ? scrollRef : undefined} data-scroll-root className={styles.scroll}>
           <div ref={contentRef} className={styles.column}>
+            {compression ? <ContextSummary compression={compression} /> : null}
             {messages.map((message, index) =>
               message.role === 'user' ? (
                 <UserMessage

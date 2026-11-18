@@ -1,0 +1,42 @@
+.container {
+  margin: 16px 0 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--dsw-specific-login-input);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.toggle {
+  flex: none;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-brand-text);
+  cursor: pointer;
+}
+
+.body {
+  max-height: 260px;
+  margin-top: 8px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  scrollbar-color: var(--scroll-color) transparent;
+}

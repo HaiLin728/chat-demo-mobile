@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import { createId } from '../../utils/id.js'
+import { showToast } from '../../components/base/toastState.js'
 import { ApiError, streamMessage } from '../api/client.js'
 import type { ChatModel, CreateMessageRequest } from '../api/types.js'
 import { extractFileIds, getFileErrorCode, isRetryableApiError } from '../api/errors.js'
 import { cancelUpload, describeUploadError, uploadAttachment, useUploads } from '../attachments.js'
 import { useSettings } from '../settings.js'
 import { appendBranch, getVisibleMessages, normalizeSession, selectVersion } from './branches.js'
+import { composeSystem, planContext, summarizeRounds } from './compression.js'
 import * as db from './db.js'
 import {
   clearAllDrafts,
@@ -28,6 +30,7 @@ import {
   type FileAttachment,
   type Message,
   type Session,
+  type SessionCompression,
   type SessionSummary,
   type UserMessage,
 } from './types.js'
@@ -959,6 +962,50 @@ const waitForRetry = (attempt: number, signal: AbortSignal) =>
  * 补传失败时回复记为 upload 错误，可重试。
  * 服务端判定 file_id 失效时重新补传后重发，退避重试且次数有上限，超过则按原始报错收尾。
  */
+/**
+ * 超过上下文预算时先把较早轮次压缩成摘要：前三轮与最近几轮保持原文。
+ * 摘要失败（用户停止除外）不阻断发送，只提示并跳过中间轮次。
+ */
+const prepareContext = async (
+  sessionId: string,
+  request: Request,
+  model: ChatModel,
+  signal: AbortSignal
+): Promise<{ history: Message[]; summary: string }> => {
+  const plan = planContext({
+    history: request.history,
+    question: request.question,
+    compression: getSession(sessionId)?.compression,
+  })
+  const apiKey = useSettings.getState().apiKey ?? ''
+  if (!plan.pending || !apiKey) {
+    return { history: plan.history, summary: plan.summary }
+  }
+  try {
+    const summary = await summarizeRounds({
+      apiKey,
+      model,
+      previousSummary: plan.summary,
+      rounds: plan.pending,
+      signal,
+    })
+    const compression: SessionCompression = {
+      summary,
+      coveredId: plan.pending.at(-1)?.[1].id ?? '',
+      rounds: plan.compressedRounds + plan.pending.length,
+      updatedAt: Date.now(),
+    }
+    updateSession(sessionId, (session) => ({ ...session, compression }))
+    persist(sessionId)
+    showToast({ key: 'contextCompressed', params: { rounds: compression.rounds } })
+    return { history: plan.history, summary }
+  } catch (error) {
+    signal.throwIfAborted()
+    showToast({ key: 'contextCompressFailed' })
+    return { history: plan.history, summary: plan.summary }
+  }
+}
+
 const streamReply = async (sessionId: string, initial: AssistantMessage, request: Request) => {
   const controller = new AbortController()
   if (!getSession(sessionId)?.title) {
@@ -975,6 +1022,15 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
   streamFlushes.set(sessionId, flush)
 
   try {
+    let context: { history: Message[]; summary: string }
+    try {
+      context = await prepareContext(sessionId, request, initial.model ?? MODEL, controller.signal)
+    } catch {
+      // 压缩摘要期间被停止：按已停止收尾，请求不再发出
+      reply = settleReply(reply, 'stopped', Date.now())
+      return
+    }
+    request = { ...request, history: context.history }
     for (let attempt = 0; ; attempt += 1) {
       /** 附件补齐前出错属于上传失败，请求还没有发出 */
       let preparing = true
@@ -1000,7 +1056,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
           useSettings.getState().apiKey ?? '',
           {
             model: initial.model ?? MODEL,
-            system: SYSTEM_PROMPT,
+            system: composeSystem(context.summary, SYSTEM_PROMPT),
             messages,
             thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
             safety_check: SAFETY_CHECK,

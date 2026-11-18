@@ -1,0 +1,38 @@
+.dialog {
+  width: 420px;
+}
+
+.unofficial {
+  margin: 0 0 14px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.block {
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--dsw-specific-login-input);
+}
+
+.blockTitle {
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.blockBody {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.github {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  word-break: break-all;
+}
+
+.github a {
+  color: var(--dsw-alias-brand-text);
+  text-decoration: none;
+}

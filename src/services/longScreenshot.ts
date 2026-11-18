@@ -34,7 +34,7 @@ let savedScroll: { scrollTop: number; behavior: string } | null = null
 type LongShotBridge = {
   metrics(): string
   prepare(): void
-  scrollTo(y: number): void
+  scrollTo(y: number): number | null
   restore(): void
 }
 
@@ -77,9 +77,12 @@ export const installLongScreenshotBridge = () => {
     },
     scrollTo: (y: number) => {
       const el = findScroller()
-      if (el) {
-        el.scrollTop = y
+      if (!el) {
+        return null
       }
+      el.scrollTop = y
+      // 返回实际滚动位置：浏览器可能按整数像素对齐，系统截图要用它校正坐标。
+      return el.scrollTop
     },
     restore: () => {
       const el = findScroller()

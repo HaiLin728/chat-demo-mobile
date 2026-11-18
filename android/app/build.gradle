@@ -1,5 +1,21 @@
 apply plugin: 'com.android.application'
 
+// 正式版签名：优先读 android/keystore.properties（本地保留，已被 .gitignore 排除），
+// 其次读环境变量 XIYAN_KEYSTORE_*。两者都不存在时 assembleRelease 只产出未签名包。
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+def signingValue = { String propKey, String envKey ->
+    def value = project.findProperty(propKey) ?: keystoreProps.getProperty(propKey) ?: System.getenv(envKey)
+    return value ? value.toString() : null
+}
+def releaseStorePath = signingValue('storeFile', 'XIYAN_KEYSTORE_PATH')
+def releaseStorePassword = signingValue('storePassword', 'XIYAN_KEYSTORE_PASSWORD')
+def releaseKeyAlias = signingValue('keyAlias', 'XIYAN_KEY_ALIAS')
+def releaseKeyPassword = signingValue('keyPassword', 'XIYAN_KEY_PASSWORD')
+
 android {
     namespace = "dev.xiyan.chat"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +32,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (releaseStorePath != null) {
+                storeFile rootProject.file(releaseStorePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (releaseStorePath != null) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -6,6 +6,7 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 import { closeMobileSider, useMobileSider } from '../components/sider/mobileSiderState.js'
 import { closeSearchPanel, useSearchPanel } from '../components/search/searchPanelState.js'
 import { closeSettings, useSettingsDialog } from '../components/settings/settingsDialogState.js'
+import { useSettings } from './settings.js'
 import {
   closeAttachmentSheet,
   useAttachmentSheet,
@@ -37,6 +38,10 @@ const syncStatusBar = () => {
  * 不拦截时系统会直接杀掉页面，输入框里的草稿会丢失。
  */
 const onAndroidBack = () => {
+  // 风险提示未确认前忽略返回键，避免误触直接把 App 关掉
+  if (!useSettings.getState().startupNoticeAcknowledged) {
+    return
+  }
   if (useAttachmentSheet.getState().open) {
     closeAttachmentSheet()
     return

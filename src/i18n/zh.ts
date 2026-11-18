@@ -184,4 +184,14 @@ export const zh = {
   longShotTooShort: '当前会话不足一屏，无需导出长图',
   longShotSaveFailed: '生成长图失败，请稍后再试',
   longShotTruncated: '会话较长，长图只包含开头部分',
+  startupNoticeTitle: '使用前须知',
+  startupNoticeUnofficial: '本软件是非官方开源项目，与 DeepSeek 没有隶属关系。',
+  startupNoticeImportTitle: '导入的会话无法导回官方 App',
+  startupNoticeImportBody:
+    '从 DeepSeek 官方 App 导入到本应用的会话不可逆：官方 App 目前不支持导入会话，导入后想回官方 App 继续聊，历史记录不会跟过去。请考虑清楚后再操作。',
+  startupNoticeFeeTitle: '本软件不额外收费',
+  startupNoticeFeeBody:
+    'API 需要你自己到 DeepSeek 官网充值并复制 Key。如果遇到「本软件额外收费才能下载或使用」，请立即举报，以免财产损失。',
+  startupNoticeGithub: '项目地址（可在此核对最新版本）：',
+  startupNoticeConfirm: '我已了解，开始使用',
 } as const

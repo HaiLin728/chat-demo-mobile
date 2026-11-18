@@ -193,4 +193,15 @@ export const en = {
   longShotTooShort: 'This chat fits on one screen, no long image needed',
   longShotSaveFailed: 'Failed to generate the image. Please try again.',
   longShotTruncated: 'The chat is long; the image only contains the beginning',
+  startupNoticeTitle: 'Before you start',
+  startupNoticeUnofficial:
+    'This is an unofficial open-source project and is not affiliated with DeepSeek.',
+  startupNoticeImportTitle: 'Imported chats cannot be moved back',
+  startupNoticeImportBody:
+    'Chats imported from the official DeepSeek app cannot be exported back. The official app does not support importing conversations, so your history will not follow you if you return to it. Please make sure you understand this before continuing.',
+  startupNoticeFeeTitle: 'This app does not charge extra',
+  startupNoticeFeeBody:
+    'Top up and copy your API key on the official DeepSeek website. If someone charges extra to download or use this app, report it immediately to avoid financial loss.',
+  startupNoticeGithub: 'Project home (check the latest version here):',
+  startupNoticeConfirm: 'I understand, continue',
 } satisfies Record<keyof typeof zh, string>

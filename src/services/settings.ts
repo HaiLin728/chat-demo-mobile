@@ -7,7 +7,7 @@ export type Locale = 'zh-CN' | 'en-US'
 /** 主题偏好；默认跟随系统 */
 export type ThemePreference = 'light' | 'dark' | 'system'
 
-/** 本机设置，存 localStorage：API Key、语言、主题、位置、朗读音色、深度思考与智能搜索开关、侧边栏收起状态 */
+/** 本机设置，存 localStorage：API Key、语言、主题、位置、朗读音色、深度思考与智能搜索开关、侧边栏收起状态、启动风险提示是否已确认 */
 type Settings = {
   apiKey: string | null
   locale: Locale
@@ -17,6 +17,7 @@ type Settings = {
   thinking: boolean
   search: boolean
   siderCollapsed: boolean
+  startupNoticeAcknowledged: boolean
 }
 
 const KEYS = {
@@ -28,6 +29,7 @@ const KEYS = {
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
   siderCollapsed: 'chat-demo:sider-collapsed',
+  startupNotice: 'chat-demo:startup-notice',
 } as const
 
 const read = (key: string) => {
@@ -96,6 +98,7 @@ export const useSettings = create<Settings>(() => ({
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
   siderCollapsed: read(KEYS.siderCollapsed) === 'true',
+  startupNoticeAcknowledged: read(KEYS.startupNotice) === 'true',
 }))
 
 export const setLocale = (locale: Locale) => {
@@ -137,4 +140,10 @@ export const setSearch = (search: boolean) => {
 export const setSiderCollapsed = (siderCollapsed: boolean) => {
   write(KEYS.siderCollapsed, String(siderCollapsed))
   useSettings.setState({ siderCollapsed })
+}
+
+/** 用户确认过启动风险提示后不再弹出。 */
+export const acknowledgeStartupNotice = () => {
+  write(KEYS.startupNotice, 'true')
+  useSettings.setState({ startupNoticeAcknowledged: true })
 }

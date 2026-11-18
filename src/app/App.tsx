@@ -16,6 +16,7 @@ import { MobileHeader } from '../components/session/MobileHeader.js'
 import { Welcome } from '../components/session/Welcome.js'
 import { ensureApiKey } from '../components/settings/settingsDialogState.js'
 import { SettingsDialog } from '../components/settings/SettingsDialog.js'
+import { StartupNotice } from '../components/startup/StartupNotice.js'
 import { Toast } from '../components/base/Toast.js'
 import { showToast } from '../components/base/toastState.js'
 import { onUploadNotice } from '../services/attachments.js'
@@ -67,10 +68,12 @@ export const App = () => {
   // 移动端选中会话、切换布局后收起抽屉
   useEffect(closeMobileSider, [activeId, isMobile])
 
+  // 只在启动时执行一次：首次打开先让用户确认风险提示，确认后再引导输入 API Key（见 StartupNotice）
   useEffect(() => {
     void initChat()
-    // 首次打开先在设置里输入 API Key
-    ensureApiKey()
+    if (useSettings.getState().startupNoticeAcknowledged) {
+      ensureApiKey()
+    }
   }, [])
 
   return (
@@ -133,6 +136,7 @@ export const App = () => {
         <SearchPanel />
       </div>
       <SettingsDialog />
+      <StartupNotice />
       <Toast />
     </>
   )

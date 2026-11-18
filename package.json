@@ -1,6 +1,6 @@
 {
   "name": "xiyan-chat",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "溪言：基于 DeepSeek API 的独立移动端聊天应用（Capacitor）。",
   "license": "MIT",
   "private": true,

@@ -8,10 +8,10 @@ import type { AssistantMessage, Message, SessionCompression, UserMessage } from 
  * 超过后把较早的轮次压缩成摘要，前三轮（通常是系统提示、人设和世界书）始终原样保留。
  */
 export const CONTEXT_TOKEN_LIMIT = 350_000
-/** 开头不压缩的轮次：前几轮一般是人设、世界书与规则，压缩会破坏设定。 */
-export const KEEP_HEAD_ROUNDS = 3
-/** 末尾原样保留的轮次，保证最近剧情细节不丢。 */
-export const KEEP_TAIL_ROUNDS = 6
+/** 开头不压缩的轮次：前 20 轮一般是人设、世界书、规则与语气校正，压缩会破坏设定。 */
+export const KEEP_HEAD_ROUNDS = 20
+/** 末尾原样保留的轮次，保证最近 50 轮的剧情细节与语气不丢。 */
+export const KEEP_TAIL_ROUNDS = 50
 /** 单次摘要请求最多读取的对话 token；超出就分块合并，避免摘要请求自己超上下文。 */
 const SUMMARY_CHUNK_TOKENS = 60_000
 /** 摘要正文的软上限，提示模型控制篇幅 */
@@ -101,7 +101,9 @@ export const planContext = ({
   compression?: SessionCompression
 }): ContextPlan => {
   const rounds = getContextRounds(history)
-  const coveredIndex = compression ? findCoveredIndex(rounds, compression.coveredId) : -1
+  // 摘要覆盖到开头保护轮次以内时不再有意义（这些轮次始终原文发送），按无摘要处理，避免重复
+  const found = compression ? findCoveredIndex(rounds, compression.coveredId) : -1
+  const coveredIndex = found >= KEEP_HEAD_ROUNDS ? found : -1
   const summary = compression && coveredIndex >= 0 ? compression.summary : ''
   const overLimit = contextTokens(rounds, question, summary) >= CONTEXT_TOKEN_LIMIT
 
